@@ -10,6 +10,8 @@ const session = require('express-session');
 const MongoStore = require('connect-mongo');
 require('./config/database');
 const isSignedIn = require("./middleware/is-signed-in.js");
+const passUserToView = require("./middleware/pass-user-to-view.js")
+
 
 // Controller imports
 const authCtrl = require('./controllers/auth');
@@ -32,19 +34,17 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: true,
-    store: MongoStore.create({
-      mongoUrl: process.env.MONGODB_URI,
-    }),
   })
 );
+// Add our custom middleware right after the session middleware
+app.use(passUserToView);
 
 // ROUTES
 app.use('/auth', authCtrl);
 
 
-
 app.get('/vip-lounge', isSignedIn, (req, res) => {
-  
+
     res.send(`Welcome to the party ${req.session.user.username}.`);
 
 });
@@ -52,7 +52,7 @@ app.get('/vip-lounge', isSignedIn, (req, res) => {
 app.get('/', (req, res, next) => {
   const user = req.session.user;
 
-  res.render('index.ejs', { user });
+  res.render('index.ejs');
 });
 
 app.listen(port, () => {
