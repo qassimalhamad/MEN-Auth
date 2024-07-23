@@ -40,7 +40,14 @@ router.post('/sign-up', async (req, res, next) => {
 
     const user = await User.create(payload);
 
-    res.send(`Thanks for signing up ${user.username}`);
+    req.session.user = {
+      username: user.username,
+      _id: user._id,
+    };
+
+    req.session.save(() => {
+      res.redirect('/');
+    });
   } catch (error) {
     throw new Error('Something went wrong');
   }
@@ -69,19 +76,25 @@ router.post('/sign-in', async (req, res, next) => {
   if (!validPassword) {
     res.send('Invalid username or password');
   }
-  req.session.user = {
-    username : existingUser.name , 
-    _id: existingUser._id,
-  }
 
-  res.redirect('/')
+  req.session.user = {
+    username: existingUser.username,
+    _id: existingUser._id,
+  };
+
+  // res.redirect('/');
+  // if we use databse session strategy we need to listen to the session store.
+
+  req.session.save(() => {
+    res.redirect('/');
+  });
 });
 
-// Sign-out
-
-router.get('/sign-out' , (req,res,next) => {
-    req.session.destroy();
+// Logout
+router.get('/sign-out', (req, res, next) => {
+  req.session.destroy(() => {
     res.redirect('/');
-})
+  });
+});
 
 module.exports = router;
