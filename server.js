@@ -7,6 +7,10 @@ const morgan = require("morgan");
 
 require('./config/database')
 
+// Controllers
+
+const authController = require('./controllers/auth')
+
 const app = express();
 // Set the port from environment variable or default to 3000
 const port = process.env.PORT ? process.env.PORT : "3000";
@@ -19,6 +23,8 @@ app.use(morgan('dev'));
 
 
 // Routes
+
+app.use('/auth', authController); //app.use is a middleware
 
 app.get("/", async (req, res , next) => { // Path
     res.render("index.ejs"); //We need a file when render, it already sees the views file
