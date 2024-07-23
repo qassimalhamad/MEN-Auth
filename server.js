@@ -4,6 +4,7 @@ dotenv.config();
 const express = require("express");
 const methodOverride = require("method-override");
 const morgan = require("morgan");
+const session = require('express-session');
 
 require('./config/database')
 
@@ -20,14 +21,25 @@ const port = process.env.PORT ? process.env.PORT : "3000";
 app.use(express.urlencoded({ extended: false }));
 app.use(methodOverride("_method"));
 app.use(morgan('dev'));
+;
+
+app.use(session({
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
 
 
 // Routes
 
 app.use('/auth', authController); //app.use is a middleware
 
-app.get("/", async (req, res , next) => { // Path
-    res.render("index.ejs"); //We need a file when render, it already sees the views file
+app.get("/", (req, res) => {
+    res.render("index.ejs", {
+      user: req.session.user,
+    });
   });
 
 
